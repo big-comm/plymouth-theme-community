@@ -9,10 +9,10 @@ cyan="\e[1;38;5;45m"         # Bold cyan
 white="\e[1;97m"             # Bold white
 reset="\e[0m"                # Reset text formatting
 
-# Print status messages - CHANGE 'PACKAGE_NAME' to your actual package name
+# Print status messages
 printMsg() {
     local message=$1
-    echo -e "${blueDark}[${lightBlue}PACKAGE_NAME${blueDark}]${reset} ${cyan}→${reset} ${white}${message}${reset}"
+    echo -e "${blueDark}[${lightBlue}plymouth-community${blueDark}]${reset} ${cyan}→${reset} ${white}${message}${reset}"
 }
 
 # Function executed before package installation
@@ -26,18 +26,25 @@ printMsg() {
 # }
 
 # Function executed after package installation
-# post_install() {
-#     printMsg "Configuring the package after installation..."
-#     # Example: Create a configuration directory
-#     # mkdir -p /etc/mypackage
-#     # chmod 755 /etc/mypackage
-#     # printMsg "Created configuration directory"
-#
-#     # Example: Start a service
-#     # systemctl enable myservice.service
-#     # systemctl start myservice.service
-#     # printMsg "Service enabled and started"
-# }
+post_install() {
+    printMsg "Configuring Plymouth after installation..."
+    
+    # add plymouth to mkinitcpio
+    if ! grep -q plymouth /etc/mkinitcpio.conf; then
+        printMsg "Adding Plymouth to mkinitcpio hooks..."
+        sed -i '/HOOKS=/s/"/"plymouth /' /etc/mkinitcpio.conf
+        sed -i '/HOOKS=/s/(/(plymouth /' /etc/mkinitcpio.conf
+    fi
+
+    printMsg "Setting default Plymouth theme..."
+    plymouth-set-default-theme -R community
+
+    # Enable systemd log
+    printMsg "Enabling Plymouth log service..."
+    systemctl enable plymouth-show-log-comm.service
+    
+    printMsg "Plymouth installation completed successfully!"
+}
 
 # Function executed before package upgrade
 # pre_upgrade() {
@@ -48,35 +55,33 @@ printMsg() {
 # }
 
 # Function executed after package upgrade
-# post_upgrade() {
-#     printMsg "Finalizing package upgrade..."
-#     # Usually, post_install is called here to ensure
-#     # all post-installation configurations are applied
-#     # post_install
-#
-#     # Example: Check and update configuration files
-#     # if [ -f /etc/mypackage/config.conf.pacnew ]; then
-#     #     printMsg "New configuration file available. Please review /etc/mypackage/config.conf.pacnew"
-#     # fi
-#     # printMsg "Upgrade completed successfully"
-# }
+post_upgrade() {
+    printMsg "Upgrading Plymouth configuration..."
+    post_install
+}
 
 # Function executed before package removal
-# pre_remove() {
-#     printMsg "Preparing to remove the package..."
-#     # Example: Stop services
-#     # systemctl stop myservice.service
-#     # systemctl disable myservice.service
-#     # printMsg "Services stopped"
-# }
+pre_remove() {
+    printMsg "Preparing to remove Plymouth..."
+    # Disable plymouth service before removal
+    printMsg "Disabling Plymouth service..."
+    systemctl disable plymouth-show-log-comm.service
+}
 
 # Function executed after package removal
-# post_remove() {
-#     printMsg "Cleaning up after package removal..."
-#     # Example: Remove data directories created by the package
-#     # rm -rf /var/lib/mypackage
-#     # printMsg "Package directories removed"
-#
-#     # printMsg "If you want to remove all user data, run:"
-#     # printMsg "rm -rf /home/*/mypackage_data"
-# }
+post_remove() {
+    printMsg "Cleaning up after Plymouth removal..."
+    
+    # Remove plymouth from mkinitcpio hooks
+    printMsg "Removing Plymouth from mkinitcpio hooks..."
+    sed -i 's/plymouth //' /etc/mkinitcpio.conf
+    
+    # Regenerate initramfs without plymouth
+    printMsg "Regenerating initramfs without Plymouth..."
+    mkinitcpio -P
+    
+    printMsg "Plymouth has been removed from the system."
+    printMsg "Note: If you want to completely remove all Plymouth configurations, you may need to:"
+    printMsg "1. Check /etc/plymouth/ for any remaining configuration files"
+    printMsg "2. Remove any Plymouth-related themes in /usr/share/plymouth/themes/"
+}
