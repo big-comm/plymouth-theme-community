@@ -2,16 +2,11 @@
 Window.SetBackgroundTopColor (0, 0, 0);
 Window.SetBackgroundBottomColor (0, 0, 0);
 
-# Loading images for both animations
-# First animation (no loop)
-for (i = 1; i < 111; i++) {
-    intro_animation[i] = Image("progress-" + i + ".png");
-}
-
-# Second animation (with loop)
-loop_frames = 36; # Total frames for loop animation
-for (i = 1; i <= loop_frames; i++) {
-    loop_animation[i] = Image("loop-progress-" + i + ".png");
+# Loading HTML-rendered animation frames
+total_frames = 146;
+frame_delay = 1.23;
+for (i = 1; i <= total_frames; i++) {
+    boot_animation[i] = Image("progress-" + i + ".png");
 }
 
 animation_sprite = Sprite();
@@ -20,41 +15,22 @@ animation_sprite = Sprite();
 animation_sprite.SetOpacity(1);
 
 # Center the animation on screen
-animation_sprite.SetX(Window.GetWidth() / 2 - intro_animation[1].GetWidth() / 2);
-animation_sprite.SetY(Window.GetHeight() / 2 - intro_animation[1].GetHeight() / 2);
+animation_sprite.SetX(Window.GetWidth() / 2 - boot_animation[1].GetWidth() / 2);
+animation_sprite.SetY(Window.GetHeight() / 2 - boot_animation[1].GetHeight() / 2);
 
 progress = 1;
-intro_finished = 0;  # Flag to control when first animation is done
 
 fun refresh_callback() {
-    if (intro_finished == 0) {
-        # First animation - runs once
-        current_frame = Math.Int(progress / 1.7);  # Original timing for first animation
-        if (current_frame < 110) {
-            animation_sprite.SetImage(intro_animation[current_frame + 1]);
-            progress++;
-        } else {
-            intro_finished = 1;
-            progress = 1;  # Reset progress for second animation
-        }
-    } else {
-        # Second animation - loops
-        # Using same frame timing as first animation
-        current_frame = Math.Int(progress / 1.7) % loop_frames;
-        animation_sprite.SetImage(loop_animation[current_frame + 1]);
+    current_frame = Math.Int(progress / frame_delay);
+    if (current_frame < total_frames) {
+        animation_sprite.SetImage(boot_animation[current_frame + 1]);
         progress++;
+    } else {
+        animation_sprite.SetImage(boot_animation[total_frames]);
     }
 }
 
 Plymouth.SetRefreshFunction(refresh_callback);
-
-# Smooth exit
-fun quit_callback() {
-    animation_sprite.SetOpacity(0);
-}
-
-Plymouth.SetQuitFunction(quit_callback);
-
 
 #----------------------------------------- Dialogue --------------------------------
 
@@ -140,38 +116,11 @@ fun display_password_callback (prompt, bullets)
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 
-#----------------------------------------- Progress Bar --------------------------------
-
-# progress_box.image = Image("progress_box.png");
-# progress_box.sprite = Sprite(progress_box.image);
-# 
-# progress_box.x = Window.GetX() + Window.GetWidth() / 2 - progress_box.image.GetWidth() / 2;
-# progress_box.y = Window.GetY() + Window.GetHeight() * 0.75 - progress_box.image.GetHeight() / 2;
-# progress_box.sprite.SetPosition(progress_box.x, progress_box.y, 0);
-# 
-# progress_bar.original_image = Image("progress_bar.png");
-# progress_bar.sprite = Sprite();
-# 
-# progress_bar.x = Window.GetX() + Window.GetWidth()  / 2 -        progress_bar.original_image.GetWidth() / 2;
-# progress_bar.y = Window.GetY() + Window.GetHeight() / 2 * 1.5  - progress_box.image.GetHeight() / 2 + (progress_box.image.GetHeight() - progress_bar.original_image.GetHeight()) / 2;
-# progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
-# 
-# fun progress_callback (duration, progress)
-#   {
-#     if (progress_bar.image.GetWidth () != Math.Int (progress_bar.original_image.GetWidth () * progress))
-#       {
-#         progress_bar.image = progress_bar.original_image.Scale(progress_bar.original_image.GetWidth(progress_bar.original_image) * progress, progress_bar.original_image.GetHeight());
-#         progress_bar.sprite.SetImage (progress_bar.image);
-#       }
-#   }
-# 
-# Plymouth.SetBootProgressFunction(progress_callback);
-
 #----------------------------------------- Quit --------------------------------
 
 fun quit_callback ()
 {
-  logo.sprite.SetOpacity (1);
+  animation_sprite.SetOpacity (0);
 }
 
 Plymouth.SetQuitFunction(quit_callback);
@@ -218,4 +167,4 @@ fun hide_message_callback (text)
 Plymouth.SetDisplayMessageFunction (display_message_callback);
 Plymouth.SetHideMessageFunction (hide_message_callback);
 
-Plymouth.SetUpdateStatusFunction(dispay_message_callback);
+Plymouth.SetUpdateStatusFunction(display_message_callback);
