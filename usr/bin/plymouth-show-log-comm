@@ -1,7 +1,13 @@
 #!/bin/bash
 
 # From https://gist.github.com/krzys-h/6ec7c7ca1c381c3a5546b1dd51bd68ca
- 
+
+configFile="/etc/biglinux/plymouth-community.conf"
+
+if ! grep -Eq '^[[:space:]]*SHOW_BOOT_MESSAGES[[:space:]]*=[[:space:]]*true([[:space:]]*(#.*)?)?$' "$configFile" 2>/dev/null; then
+	exit 0
+fi
+
 /usr/bin/plymouth display-message --text="systemd"
 
 journalctl -f -n0 --system -t systemd -o cat | while read -r line; do

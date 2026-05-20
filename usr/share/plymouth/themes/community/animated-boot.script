@@ -3,30 +3,49 @@ Window.SetBackgroundTopColor (0, 0, 0);
 Window.SetBackgroundBottomColor (0, 0, 0);
 
 # Loading HTML-rendered animation frames
-total_frames = 146;
+intro_frames = 97;
+loop_frames = 49;
 frame_delay = 1.23;
-for (i = 1; i <= total_frames; i++) {
-    boot_animation[i] = Image("progress-" + i + ".png");
+for (i = 1; i <= intro_frames; i++) {
+    intro_animation[i] = Image("progress-" + i + ".png");
+}
+for (i = 1; i <= loop_frames; i++) {
+    loop_animation[i] = Image("loop-progress-" + i + ".png");
 }
 
 animation_sprite = Sprite();
 
 # Set up and display sprite immediately
+animation_sprite.SetImage(intro_animation[1]);
 animation_sprite.SetOpacity(1);
 
 # Center the animation on screen
-animation_sprite.SetX(Window.GetWidth() / 2 - boot_animation[1].GetWidth() / 2);
-animation_sprite.SetY(Window.GetHeight() / 2 - boot_animation[1].GetHeight() / 2);
+animation_sprite.SetX(Window.GetWidth() / 2 - intro_animation[1].GetWidth() / 2);
+animation_sprite.SetY(Window.GetHeight() / 2 - intro_animation[1].GetHeight() / 2);
 
-progress = 1;
+intro_progress = 0;
+loop_progress = 0;
+intro_complete = 0;
 
 fun refresh_callback() {
-    current_frame = Math.Int(progress / frame_delay);
-    if (current_frame < total_frames) {
-        animation_sprite.SetImage(boot_animation[current_frame + 1]);
-        progress++;
+    if (intro_complete == 0) {
+        current_frame = Math.Int(intro_progress / frame_delay) + 1;
+        if (current_frame <= intro_frames) {
+            animation_sprite.SetImage(intro_animation[current_frame]);
+            intro_progress++;
+        } else {
+            intro_complete = 1;
+            loop_progress = 0;
+            animation_sprite.SetImage(loop_animation[1]);
+        }
     } else {
-        animation_sprite.SetImage(boot_animation[total_frames]);
+        current_frame = Math.Int(loop_progress / frame_delay) + 1;
+        if (current_frame > loop_frames) {
+            loop_progress = 0;
+            current_frame = 1;
+        }
+        animation_sprite.SetImage(loop_animation[current_frame]);
+        loop_progress++;
     }
 }
 

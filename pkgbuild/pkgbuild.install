@@ -39,8 +39,15 @@ post_install() {
     printMsg "Setting default Plymouth theme..."
     plymouth-set-default-theme -R community
 
-    # Enable systemd log
-    printMsg "Enabling Plymouth log service..."
+    # Default: keep the boot animation clean unless enabled in settings.
+    mkdir -p /etc/biglinux
+    if [ ! -f /etc/biglinux/plymouth-community.conf ]; then
+        printf '# BigCommunity Plymouth settings\nSHOW_BOOT_MESSAGES=false\n' > /etc/biglinux/plymouth-community.conf
+        chmod 0644 /etc/biglinux/plymouth-community.conf
+    fi
+
+    # Enable optional systemd log service
+    printMsg "Enabling optional Plymouth log service..."
     systemctl enable plymouth-show-log-comm.service
     
     printMsg "Plymouth installation completed successfully!"
