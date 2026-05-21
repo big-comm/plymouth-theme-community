@@ -15,6 +15,27 @@ printMsg() {
     echo -e "${blueDark}[${lightBlue}plymouth-community${blueDark}]${reset} ${cyan}→${reset} ${white}${message}${reset}"
 }
 
+syncBootMessages() {
+    local configFile="/etc/biglinux/plymouth-community.conf"
+    local themeScript="/usr/share/plymouth/themes/community/animated-boot.script"
+
+    [ -f "$themeScript" ] || return 0
+
+    if grep -Eq '^[[:space:]]*SHOW_BOOT_MESSAGES[[:space:]]*=[[:space:]]*true([[:space:]]*(#.*)?)?$' "$configFile" 2>/dev/null; then
+        sed -i \
+            -e 's|^[[:space:]]*#[[:space:]]*\(Plymouth\.SetDisplayMessageFunction.*\)|\1|' \
+            -e 's|^[[:space:]]*#[[:space:]]*\(Plymouth\.SetHideMessageFunction.*\)|\1|' \
+            -e 's|^[[:space:]]*#[[:space:]]*\(Plymouth\.SetUpdateStatusFunction.*\)|\1|' \
+            "$themeScript"
+    else
+        sed -i \
+            -e 's|^[[:space:]]*\(Plymouth\.SetDisplayMessageFunction.*\)|# \1|' \
+            -e 's|^[[:space:]]*\(Plymouth\.SetHideMessageFunction.*\)|# \1|' \
+            -e 's|^[[:space:]]*\(Plymouth\.SetUpdateStatusFunction.*\)|# \1|' \
+            "$themeScript"
+    fi
+}
+
 # Function executed before package installation
 # pre_install() {
 #     printMsg "Preparing to install the package..."
@@ -36,15 +57,17 @@ post_install() {
         sed -i '/HOOKS=/s/(/(plymouth /' /etc/mkinitcpio.conf
     fi
 
-    printMsg "Setting default Plymouth theme..."
-    plymouth-set-default-theme -R community
-
     # Default: keep the boot animation clean unless enabled in settings.
     mkdir -p /etc/biglinux
     if [ ! -f /etc/biglinux/plymouth-community.conf ]; then
         printf '# BigCommunity Plymouth settings\nSHOW_BOOT_MESSAGES=false\n' > /etc/biglinux/plymouth-community.conf
         chmod 0644 /etc/biglinux/plymouth-community.conf
     fi
+
+    syncBootMessages
+
+    printMsg "Setting default Plymouth theme..."
+    plymouth-set-default-theme -R community
 
     # Enable optional systemd log service
     printMsg "Enabling optional Plymouth log service..."
