@@ -57,10 +57,10 @@ post_install() {
         sed -i '/HOOKS=/s/(/(plymouth /' /etc/mkinitcpio.conf
     fi
 
-    # Default: keep the boot animation clean unless enabled in settings.
+    # Default: show boot messages unless disabled in settings.
     mkdir -p /etc/biglinux
     if [ ! -f /etc/biglinux/plymouth-community.conf ]; then
-        printf '# BigCommunity Plymouth settings\nSHOW_BOOT_MESSAGES=false\n' > /etc/biglinux/plymouth-community.conf
+        printf '# BigCommunity Plymouth settings\nSHOW_BOOT_MESSAGES=true\n' > /etc/biglinux/plymouth-community.conf
         chmod 0644 /etc/biglinux/plymouth-community.conf
     fi
 

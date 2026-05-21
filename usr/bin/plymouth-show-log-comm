@@ -4,7 +4,7 @@
 
 configFile="/etc/biglinux/plymouth-community.conf"
 
-if ! grep -Eq '^[[:space:]]*SHOW_BOOT_MESSAGES[[:space:]]*=[[:space:]]*true([[:space:]]*(#.*)?)?$' "$configFile" 2>/dev/null; then
+if grep -Eq '^[[:space:]]*SHOW_BOOT_MESSAGES[[:space:]]*=[[:space:]]*false([[:space:]]*(#.*)?)?$' "$configFile" 2>/dev/null; then
 	exit 0
 fi
 

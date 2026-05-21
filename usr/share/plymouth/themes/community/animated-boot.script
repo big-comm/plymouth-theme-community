@@ -183,8 +183,8 @@ fun hide_message_callback (text)
     }
 }
 
-# Boot message callbacks are disabled by default. BigLinux Settings toggles
-# these lines and rebuilds the initramfs when the user enables messages.
-# Plymouth.SetDisplayMessageFunction (display_message_callback);
-# Plymouth.SetHideMessageFunction (hide_message_callback);
-# Plymouth.SetUpdateStatusFunction(display_message_callback);
+# Boot message callbacks are enabled by default. BigLinux Settings toggles
+# these lines and rebuilds the initramfs when the user disables messages.
+Plymouth.SetDisplayMessageFunction (display_message_callback);
+Plymouth.SetHideMessageFunction (hide_message_callback);
+Plymouth.SetUpdateStatusFunction(display_message_callback);
