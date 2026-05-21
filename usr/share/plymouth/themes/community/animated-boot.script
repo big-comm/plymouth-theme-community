@@ -5,7 +5,8 @@ Window.SetBackgroundBottomColor (0, 0, 0);
 # Loading HTML-rendered animation frames
 intro_frames = 97;
 loop_frames = 49;
-frame_delay = 1.23;
+intro_frame_delay = 1.23;
+loop_frame_delay = 1.75;
 for (i = 1; i <= intro_frames; i++) {
     intro_animation[i] = Image("progress-" + i + ".png");
 }
@@ -29,7 +30,7 @@ intro_complete = 0;
 
 fun refresh_callback() {
     if (intro_complete == 0) {
-        current_frame = Math.Int(intro_progress / frame_delay) + 1;
+        current_frame = Math.Int(intro_progress / intro_frame_delay) + 1;
         if (current_frame <= intro_frames) {
             animation_sprite.SetImage(intro_animation[current_frame]);
             intro_progress++;
@@ -39,7 +40,7 @@ fun refresh_callback() {
             animation_sprite.SetImage(loop_animation[1]);
         }
     } else {
-        current_frame = Math.Int(loop_progress / frame_delay) + 1;
+        current_frame = Math.Int(loop_progress / loop_frame_delay) + 1;
         if (current_frame > loop_frames) {
             loop_progress = 0;
             current_frame = 1;
